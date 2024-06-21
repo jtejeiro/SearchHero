@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>baseURL</key>
+        <string>https://gateway.marvel.com</string>
+        <key>versionApi</key>
+        <string>v1</string>
+        <key>isMock</key>
+        <false/>
+        <key>PublicKey</key>
+        <string>cecf5c262aaa3e029ba3d5ce538f35a3</string>
+        <key>PrivateKey</key>
+        <string>047c37fd1a7e81ce30439bf4bb7ad79441e8c78d</string>
+        <key>RouterApi</key>
+        <string>public</string>
+    </dict>
+</plist>
