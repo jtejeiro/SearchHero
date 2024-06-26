@@ -10,11 +10,13 @@ import SwiftUI
 struct EmptyView: View {
     var body: some View {
         ZStack(alignment: .center) {
-            Spacer()
-            Image(.logo)
-                .resizable()
-                .frame(height: 150)
-            Spacer()
+            VStack {
+                Spacer()
+                Image(.logo)
+                    .resizable()
+                    .frame(height: 150)
+                Spacer()
+            }
         }
     }
 }

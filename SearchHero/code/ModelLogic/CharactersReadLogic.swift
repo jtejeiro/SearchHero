@@ -13,9 +13,6 @@ final class CharactersReadLogic {
     static let sharer = CharactersReadLogic()
     let container = try! ModelContainer(for: CharacterSavedDataModel.self)
     var charactersReadList : [CharacterSavedDataModel]
-    let limited:Int = 3
-    var isRefresh:Bool = false
-    var position:Int = 0
     
     @MainActor
     var modelContext:ModelContext {
@@ -40,7 +37,6 @@ final class CharactersReadLogic {
     
     @MainActor
     func deleteAllData() {
-        position = 0
         charactersReadList.forEach { model in
             modelContext.delete(model)
         }
@@ -59,7 +55,7 @@ final class CharactersReadLogic {
             removeIdReadCharaCharacters(id: model.id)
         }
         
-        self.insert(model: CharacterSavedDataModel(id: model.id, name: model.name, type: typeSavedModel.story.rawValue, url: model.thumbnail?.getTThumbnailUrl ?? "", position: <#Int#>))
+        self.insert(model: CharacterSavedDataModel(id: model.id, name: model.name, type: typeSavedModel.story.rawValue, url: model.thumbnail?.getTThumbnailUrl ?? ""))
     }
     
     @MainActor
@@ -69,7 +65,7 @@ final class CharactersReadLogic {
             return
         }
         
-        self.insert(model: CharacterSavedDataModel(id: model.id, name: model.name, type: typeSavedModel.story.rawValue, url: model.thumbnail?.getTThumbnailUrl ?? "", position: position))
+        self.insert(model: CharacterSavedDataModel(id: model.id, name: model.name, type: typeSavedModel.story.rawValue, url: model.thumbnail?.getTThumbnailUrl ?? ""))
     }
     
     func isReadCharaCharacters(id:Int) -> Bool{

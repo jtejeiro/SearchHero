@@ -14,13 +14,13 @@ class CharacterSavedDataModel {
     var name:String
     var type:String
     var url:String
-    var position:Int
- 
-    init(id: Int, name: String, type: String, url: String,position:Int) {
+    var position:Date
+    
+    init(id: Int, name: String, type: String, url: String) {
         self.id = id
         self.name = name
         self.type = type
         self.url = url
-        self.position = position
+        self.position = Date.now
     }
 }

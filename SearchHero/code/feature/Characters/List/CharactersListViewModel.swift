@@ -27,6 +27,8 @@ final class CharactersListViewModel {
     
     let listCharactersLogic : ListCharactersLogic
     var charactersList : [CharactersListResponse]
+    let charactersFavoriteLogic : CharactersFavoriteLogic
+    let charactersReadLogic : CharactersReadLogic
     private var orderType:OrdenByType = .nameAZ
     private var isOrderByName:Bool = false
     private var isOrderByModified:Bool = false
@@ -37,8 +39,10 @@ final class CharactersListViewModel {
     var isScrollTop:Bool = false
     
     
-    init(listCharactersLogic: ListCharactersLogic = ListCharactersLogic.sharer) {
+    init(listCharactersLogic: ListCharactersLogic = ListCharactersLogic.sharer,charactersFavoriteLogic:CharactersFavoriteLogic = CharactersFavoriteLogic.sharer,charactersReadLogic:CharactersReadLogic = CharactersReadLogic.sharer) {
         self.listCharactersLogic = listCharactersLogic
+        self.charactersFavoriteLogic = charactersFavoriteLogic
+        self.charactersReadLogic = charactersReadLogic
         self.charactersList = []
         self.processState = .display
     }
@@ -168,5 +172,8 @@ final class CharactersListViewModel {
         }
     }
     
+    func favoriteSavedData(model:CharactersListResponse) {
+        self.charactersFavoriteLogic.savedFavoriteCharaCharacters(model: model)
+    }
    
 }

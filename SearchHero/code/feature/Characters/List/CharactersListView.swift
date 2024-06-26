@@ -9,11 +9,12 @@ import SwiftUI
 import SDWebImage
 import SDWebImageSwiftUI
 import Combine
+import SwiftData
 
 struct CharactersListView: View {
     @State var viewModel: CharactersListViewModel
     @State public var hiddenBackButton: Bool = true
-    @State public var isShowMenuView: Bool = true
+    @State public var isShowMenuView: Bool = false
     @State public var isShowSearchView: Bool = false
     @State private var searchText = ""
     
@@ -139,7 +140,6 @@ struct CharactersListView: View {
 struct MenuView: View {
     @Environment(CharactersListViewModel.self) var viewModel
     
-    
     var body: some View {
         ZStack(alignment:.topTrailing) {
             Color.marvelRed
@@ -149,6 +149,9 @@ struct MenuView: View {
             
             VStack{
                 MenuFavoriteView()
+                    .environment(viewModel.charactersFavoriteLogic)
+                    
+                
                 Spacer()
                 
                 Text("orden")
@@ -178,10 +181,13 @@ struct MenuView: View {
                 
                 Spacer()
                 MenuStoryView()
+                    .environment(viewModel.charactersReadLogic)
                 Spacer()
 
             }
-            .frame(minWidth: 0, maxWidth: 60, minHeight: 0, maxHeight: .infinity, alignment: .topLeading)
+            .background(Color.marvelRed)
+            .frame(minWidth: 0, maxWidth: 60, minHeight: 0, maxHeight: .infinity, alignment: .top)
+            .padding(.top,10)
         }.frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .trailing)
     }
 }
@@ -196,7 +202,7 @@ struct CharactersContainerListView: View {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     ForEach(viewModel.charactersList){ index in
                         
-                        NavigationLink(destination: CharactersDetailsView(idCharacter: index.id)  ) {
+                        NavigationLink(destination: CharactersDetailsView(idCharacter: index.id)) {
                             CharactersCellView(model: index)
                                 .onAppear{
                                     if viewModel.isMoreDataChager {
@@ -209,6 +215,8 @@ struct CharactersContainerListView: View {
                                 .scrollTransition { content, phase in
                                     content.scaleEffect(phase.isIdentity ? 1.0: 0.8)
                                 }
+                                .environment(viewModel.charactersFavoriteLogic)
+                                .environment(viewModel.charactersReadLogic)
                         }
                     }
                 }.onChange(of: viewModel.isScrollTop) { oldState, newState in                    withAnimation {
@@ -243,20 +251,64 @@ struct CharactersContainerListView: View {
 
 
 struct CharactersCellView: View {
+    @Environment(CharactersFavoriteLogic.self) var logic
+    @Environment(CharactersReadLogic.self) var readlogic
     var model:CharactersListResponse
+    @State var isFavorite:Bool = false
+    @State var isRead:Bool = false
     
     var body: some View {
         HStack(spacing: 20){
-            WebImage(url: URL(string: model.thumbnail?.getTThumbnailUrl ?? "")) { image in
-                image
-                    .resizable()
-            } placeholder: {
-                Image(.marvelDefault)
-                    .resizable()
+            ZStack(alignment: .topLeading ) {
+                WebImage(url: URL(string: model.thumbnail?.getTThumbnailUrl ?? "")) { image in
+                    image
+                        .resizable()
+                } placeholder: {
+                    Image(.marvelDefault)
+                        .resizable()
+                }
+                .frame(width: 150)
+                .clipShape(.rect(cornerRadius: 10))
+                VStack {
+                        Button {
+                            self.isFavorite.toggle()
+                            self.logic.savedFavoriteCharaCharacters(model: model)
+                        } label: {
+                            Image(systemName: "star.fill")
+                                .resizable()
+                                .foregroundColor(self.isFavorite ? .yellow:.white)
+                                .frame(width: 20, height: 20)
+                                .padding(.all,10)
+                                .opacity(self.isFavorite ? 1.0:0.5)
+                        }
+                        .onAppear{
+                            self.isFavorite = logic.isFavoriteCharaCharacters(id: model.id)
+                        }
+                        .onChange(of: logic.charactersSavedList.count) { oldValue, newValue in
+                            self.isFavorite = logic.isFavoriteCharaCharacters(id: model.id)
+                        }
+                    Spacer()
+                    
+                    Button {
+                        isRead.toggle()
+                        self.readlogic.clickSavedReadCharaCharacters(model: model)
+                        debugPrint(model.id)
+                    } label: {
+                        Image(systemName: "bookmark.circle.fill")
+                            .resizable()
+                            .foregroundColor(self.isRead ? .blue:.white)
+                            .frame(width: 20, height: 20)
+                            .padding(.all,10)
+                            .opacity(self.isRead ? 0.8:0.4)
+                    }.onAppear{
+                        self.isRead = readlogic.isReadCharaCharacters(id: model.id)
+                    }
+                    .onChange(of: self.readlogic.charactersReadList.count) { oldValue, newValue in
+                        self.isRead = readlogic.isReadCharaCharacters(id: model.id)
+                    }
+                }
+                
             }
-             .frame(width: 150)
-             .clipShape(.rect(cornerRadius: 10))
-           
             
             VStack(alignment: .leading) {
                 Text(model.name)
@@ -285,8 +337,12 @@ struct CharactersCellView: View {
         .cornerRadius(10)
         .shadow(radius: 20)
         .padding(.all,20)
+        .onAppear{
+            readlogic.getCharacterSavedDataModel()
+        }
         
     }
+    
 }
 
 struct SearchBar: View {
@@ -351,71 +407,145 @@ struct SearchBar: View {
 }
 
 struct MenuFavoriteView: View {
+    @Environment(CharactersFavoriteLogic.self) var logic
+    
     var body: some View {
         VStack {
-            Text("me gusta")
-                .foregroundColor(.marvelRed)
-                .font(.system(size: 12))
-                .background(Color.white)
-                .padding(.all,8)
+            RoundedRectangle(cornerRadius: 5.0)
+                .foregroundColor(.white)
+                .frame(width: 30, height: 30)
+                .overlay {
+                    Image(systemName: "star.fill")
+                        .resizable()
+                        .foregroundColor(.marvelRed)
+                        .frame(width: 20, height: 20)
+                        .padding(.all,10)
+                }
             
-            ScrollView {
-                Image(systemName: "star")
-                    .resizable()
-                    .foregroundColor(.white)
-                    .frame(width: 30, height: 30)
-                    .padding(.all,10)
-                    .opacity(/*@START_MENU_TOKEN@*/0.8/*@END_MENU_TOKEN@*/)
-                
-                Image(systemName: "star")
-                    .resizable()
-                    .foregroundColor(.white)
-                    .frame(width: 30, height: 30)
-                    .padding(.all,10)
-                    .opacity(/*@START_MENU_TOKEN@*/0.8/*@END_MENU_TOKEN@*/)
-                
-                Image(systemName: "star")
-                    .resizable()
-                    .foregroundColor(.white)
-                    .frame(width: 30, height: 30)
-                    .padding(.all,10)
-                    .opacity(/*@START_MENU_TOKEN@*/0.8/*@END_MENU_TOKEN@*/)
-            }.frame(height: 170)
             
-        }
+                if !logic.charactersSavedList.isEmpty  {
+                    ScrollView(.vertical, showsIndicators: false) {
+                        ForEach(logic.charactersSavedList.reversed()) { index in
+                            NavigationLink(destination: CharactersDetailsView(idCharacter: index.id)  ) {
+                                WebImage(url: URL(string: index.url)) { image in
+                                    image
+                                        .resizable()
+                                        .frame(width: 30, height: 30)
+                                        .padding(.all,10)
+                                        .clipShape(RoundedRectangle(cornerRadius: 5.0))
+                                        .overlay {
+                                            RoundedRectangle(cornerRadius: 5.0)
+                                                .stroke(lineWidth: 2.0)
+                                                .foregroundColor(.white)
+                                                .frame(width: 30, height: 30)
+                                        }
+                                        .gesture(DragGesture().onEnded{ _ in
+                                            logic.removeIdFavoriteCharaCharacters(id: index.id)
+                                        })
+                                } placeholder: {
+                                    Image(systemName: "star")
+                                        .resizable()
+                                        .foregroundColor(.white)
+                                        .frame(width: 20, height: 20)
+                                        .padding(.all,10)
+                                        .opacity(/*@START_MENU_TOKEN@*/0.8/*@END_MENU_TOKEN@*/)
+                                        .overlay {
+                                            RoundedRectangle(cornerRadius: 5.0)
+                                                .stroke(lineWidth: 2.0)
+                                                .foregroundColor(.white)
+                                                .frame(width: 30, height: 30)
+                                        }
+                                }
+                            }
+                        }
+                    }.frame(width: 40)
+                }  else {
+                    Image(systemName: "star")
+                        .resizable()
+                        .foregroundColor(.white)
+                        .frame(width: 20, height: 20)
+                        .padding(.all,10)
+                        .opacity(/*@START_MENU_TOKEN@*/0.8/*@END_MENU_TOKEN@*/)
+                        .overlay {
+                            RoundedRectangle(cornerRadius: 5.0)
+                                .stroke(lineWidth: 2.0)
+                                .foregroundColor(.white)
+                                .frame(width: 30, height: 30)
+                        }
+                }
+        }.frame(width: 40,height: 200,alignment: .top)
     }
 }
 
 struct MenuStoryView: View {
+    @Environment(CharactersReadLogic.self) var logic
+    
     var body: some View {
         VStack {
-            Text("last")
-                .foregroundColor(.marvelRed)
-                .font(.system(size: 12))
-                .background(Color.white)
-                .padding(.all,8)
             
-            
-            Image(systemName: "clock.fill")
-                .resizable()
+            RoundedRectangle(cornerRadius: 5.0)
                 .foregroundColor(.white)
                 .frame(width: 30, height: 30)
-                .padding(.all,10)
-                .opacity(/*@START_MENU_TOKEN@*/0.8/*@END_MENU_TOKEN@*/)
+                .overlay {
+                    Image(systemName: "bookmark.circle.fill")
+                        .resizable()
+                        .foregroundColor(.marvelRed)
+                        .frame(width: 20, height: 20)
+                        .padding(.all,10)
+                }
             
-            Image(systemName: "clock.fill")
-                .resizable()
-                .foregroundColor(.white)
-                .frame(width: 30, height: 30)
-                .padding(.all,10)
-                .opacity(/*@START_MENU_TOKEN@*/0.8/*@END_MENU_TOKEN@*/)
-            
-            Image(systemName: "clock.fill")
-                .resizable()
-                .foregroundColor(.white)
-                .frame(width: 30, height: 30)
-                .padding(.all,10)
-                .opacity(/*@START_MENU_TOKEN@*/0.8/*@END_MENU_TOKEN@*/)
+            ScrollView {
+                if !logic.charactersReadList.isEmpty {
+                    ForEach(logic.charactersReadList.reversed()) { index in
+                        NavigationLink(destination: CharactersDetailsView(idCharacter: index.id)) {
+                            WebImage(url: URL(string: index.url)) { image in
+                                image
+                                    .resizable()
+                                    .frame(width: 30, height: 30)
+                                    .padding(.all,10)
+                                    .clipShape(RoundedRectangle(cornerRadius: 5.0))
+                                    .overlay {
+                                        RoundedRectangle(cornerRadius: 5.0)
+                                            .stroke(lineWidth: 2.0)
+                                            .foregroundColor(.white)
+                                            .frame(width: 30, height: 30)
+                                    }.gesture(DragGesture().onEnded{ _ in
+                                        logic.removeIdReadCharaCharacters(id: index.id)
+                                    })
+                            } placeholder: {
+                                Image(systemName: "bookmark.circle.fill")
+                                    .resizable()
+                                    .foregroundColor(.white)
+                                    .frame(width: 20, height: 20)
+                                    .padding(.all,10)
+                                    .opacity(/*@START_MENU_TOKEN@*/0.8/*@END_MENU_TOKEN@*/).overlay {
+                                        RoundedRectangle(cornerRadius: 5.0)
+                                            .stroke(lineWidth: 2.0)
+                                            .foregroundColor(.white)
+                                            .frame(width: 30, height: 30)
+                                    }
+                                
+                            }
+                        }
+                    }
+                }  else {
+                    Image(systemName: "bookmark.circle.fill")
+                        .resizable()
+                        .foregroundColor(.white)
+                        .frame(width: 20, height: 20)
+                        .padding(.all,10)
+                        .opacity(/*@START_MENU_TOKEN@*/0.8/*@END_MENU_TOKEN@*/).overlay {
+                            RoundedRectangle(cornerRadius: 5.0)
+                                .stroke(lineWidth: 2.0)
+                                .foregroundColor(.white)
+                                .frame(width: 30, height: 30)
+                        }
+                }
+            }
+            .frame(width: 40,height: 170,alignment: .top)
+        }.onAppear{
+           logic.getCharacterSavedDataModel()
         }
+
     }
 }

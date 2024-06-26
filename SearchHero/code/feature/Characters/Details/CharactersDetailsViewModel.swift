@@ -20,14 +20,18 @@ final class CharactersDetailsViewModel {
     
     
     let charactersLogic : CharactersLogic
+    let charactersFavoriteLogic : CharactersFavoriteLogic
+    let charactersReadLogic : CharactersReadLogic
     var charactersData : CharactersListResponse?
     var ComicsList : [ComicsListResponse]?
     
     let idCharacter:Int
     
-    init(idCharacter:Int,_ charactersLogic: CharactersLogic = CharactersLogic.sharer) {
+    init(idCharacter:Int,_ charactersLogic: CharactersLogic = CharactersLogic.sharer, charactersFavoriteLogic:CharactersFavoriteLogic = CharactersFavoriteLogic.sharer,charactersReadLogic:CharactersReadLogic = CharactersReadLogic.sharer) {
         self.idCharacter = idCharacter
         self.charactersLogic = charactersLogic
+        self.charactersReadLogic = charactersReadLogic
+        self.charactersFavoriteLogic = charactersFavoriteLogic
     }
 
     func displayLoading(_ isLoading:Bool = false) {
