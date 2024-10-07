@@ -9,15 +9,7 @@ import Foundation
 
 
 @Observable
-final class CharactersDetailsViewModel {
-    
-    var processState: ProcessStateTypes = .display
-    var isLoading: Bool = false
-    var isAlertbox: Bool = false
-    var alertTitle:String = "Alerta"
-    var alertMessage:String = ""
-    var alertButton:String = "ok"
-    
+final class CharactersDetailsViewModel:BaseViewModel { 
     
     let charactersLogic : CharactersLogic
     let charactersFavoriteLogic : CharactersFavoriteLogic
@@ -34,34 +26,6 @@ final class CharactersDetailsViewModel {
         self.charactersFavoriteLogic = charactersFavoriteLogic
     }
 
-    func displayLoading(_ isLoading:Bool = false) {
-        DispatchQueue.main.async  {
-            self.isLoading = isLoading
-        }
-    }
-    
-    private func displayProcessState(_ state:ProcessStateTypes) {
-        DispatchQueue.main.async  {
-            self.processState = state
-        }
-    }
-    
-    func displayAlertMessage(title:String = "" ,mesg:String = "" ,textButton:String = "") {
-        displayLoading()
-        DispatchQueue.main.async  {
-            self.isAlertbox = true
-            if title != ""  {
-                self.alertTitle = title
-            }
-            if mesg != ""  {
-                self.alertMessage = mesg
-            }
-            
-            if textButton != "" {
-                self.alertButton = textButton
-            }
-        }
-    }
    
     
     func fechCharactersData() async {
@@ -83,14 +47,11 @@ final class CharactersDetailsViewModel {
     
     func fechComicsListData() async {
         debugPrint("fechComicsList")
-        displayLoading(true)
         
         do {
             let result = try await charactersLogic.fechCharactersComicsData(id: String(idCharacter))
-            displayLoading()
             ComicsList = result
         } catch {
-            displayLoading()
             debugPrint(error.localizedDescription)
         }
     }

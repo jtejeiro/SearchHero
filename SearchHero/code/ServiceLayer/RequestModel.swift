@@ -36,7 +36,7 @@ struct RequestModel  {
     
     func getURL() -> String{
         var endpointString = endpoint.rawValue
-        var endpointsAtribute = endpointsAtribute.rawValue
+        let endpointsAtribute = endpointsAtribute.rawValue
         
         if let param = queryparam {
             endpointString = endpointString.replacingOccurrences(of: "%@", with: param)

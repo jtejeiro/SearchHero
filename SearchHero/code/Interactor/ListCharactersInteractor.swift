@@ -27,5 +27,29 @@ struct ListCharactersProvider: ListCharactersInteractor {
     }
     
     
+}
+struct ListCharactersMock: ListCharactersInteractor {
+    func loadListCharacters(params:[String:String]) async throws -> BasesPagerModel<CharactersListResponse> {
+        
+        let bundleURL: URL = Bundle.main.url(forResource: "ListCharacters", withExtension: "json")!
+        let docURL: URL = URL.documentsDirectory.appending(path: "ListCharacters.json")
+        
+        var url = docURL
+        if !FileManager.default.fileExists(atPath: url.path()) {
+            url = bundleURL
+        }
+        
+        do{
+            let data = try Data(contentsOf: url)
+            let model = try JSONDecoder().decode(BasesMarvelResponse<CharactersListResponse>.self, from: data)
+            let listResponse = model.data
+            return listResponse
+        }catch{
+            print(error)
+            throw error
+        }
+    }
+    
+    
     
 }

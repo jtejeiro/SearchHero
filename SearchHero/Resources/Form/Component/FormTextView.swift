@@ -23,17 +23,23 @@ struct FormTextView: View {
             if isHover || inputText != "" {
                 Text(placeHolder)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .font(.system(size: 15))
-                    .foregroundStyle(.black)
+                    .font(.system(size: 18))
+                    .foregroundStyle(.white)
                     .padding(.leading,10)
                     .frame(height: 15)
             }else {
                 Spacer().frame(height: 15)
             }
-            TextField(placeHolder, text: $inputText)
+            TextField(text: $inputText) {
+                Text(placeHolder)
+                    .foregroundStyle(isHover ? Color.clear: Color.white)
+                    .font(.system(size: 17))
+                    .disabled(/*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
+            }
                 .frame(height: 30)
                 .disabled(disabled)
                 .textFieldStyle(FormTextStyle(isError: isError,isDisabled: disabled))
+                .autocorrectionDisabled()
                 //.textInputAutocapitalization(.characters)
                 .disableAutocorrection(true)
                 .keyboardType(keyboardType)
@@ -91,17 +97,24 @@ struct FormTextNoEditView: View {
                 Text(placeHolder)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .font(.system(size: 15))
-                    .foregroundStyle(.black)
+                    .foregroundStyle(.white)
                     .padding(.leading,10)
                     .frame(height: 15)
             }else {
                 Spacer().frame(height: 15)
             }
-            TextField(placeHolder, text: $inputText)
+            TextField(text: $inputText) {
+                Text(placeHolder)
+                    .foregroundStyle(isHover || inputText != "" ? Color.clear: Color.white)
+                    .font(.system(size: 17))
+                    .disabled(/*@START_MENU_TOKEN@*/true/*@END_MENU_TOKEN@*/)
+
+            }
                 .frame(height: 30)
                 .disabled(disabled)
                 .textFieldStyle(FormTextStyle(isError: isError,isDisabled: isDisabled))
                 .keyboardType(keyboardType)
+                .autocorrectionDisabled()
                 .onTapGesture {
                         withAnimation {
                             self.isHover = true
@@ -126,11 +139,11 @@ struct FormTextStyle:TextFieldStyle {
     func _body(configuration: TextField<Self._Label>) -> some View {
         configuration
             .padding(.all, 6)
-                .foregroundStyle(.black)
-                .background(isDisabled ?  RoundedRectangle(cornerRadius: 6).fill(.mavelGray.opacity(0.2)) : RoundedRectangle(cornerRadius: 6).fill(.white))
+                .foregroundStyle(.white)
+                .background(isDisabled ?  RoundedRectangle(cornerRadius: 2).fill(.white.opacity(0.2)) : RoundedRectangle(cornerRadius: 2).fill(.clear))
                 .overlay(
                     RoundedRectangle(cornerRadius: 6)
-                        .stroke(isError ? Color.red : Color.mavelGray, lineWidth:1)
+                        .stroke(isError ? Color.red : Color.white, lineWidth:1)
                     )
         }
     
@@ -138,6 +151,4 @@ struct FormTextStyle:TextFieldStyle {
 }
 
 
-#Preview {
-    FormTextView(inputText: <#T##Binding<String>#>, disabled: <#T##Binding<Bool>#>, isError: <#T##Binding<Bool>#>)
-}
+

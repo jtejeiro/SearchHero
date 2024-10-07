@@ -73,10 +73,10 @@ struct CharactersDetailsView: View {
                
                 VStack(alignment: .center,spacing: 20) {
                     Spacer()
-                Text(viewModel.charactersData?.getModifiedString ?? "")
+                    Text(viewModel.charactersData?.getModifiedString ?? "")
                     .font(.callout)
                     .foregroundStyle(.white)
-                Text(viewModel.charactersData?.resultDescription ?? "" )
+                    Text(viewModel.charactersData?.resultDescription ?? "")
                     .font(.body)
                     .foregroundStyle(.white)
                 }
@@ -98,6 +98,98 @@ struct CharactersDetailsView: View {
 
 #Preview {
     CharactersDetailsView(idCharacter: 1017100)
+}
+
+
+struct CharactersDetailsHeadView: View {
+    @Environment(CharactersFavoriteLogic.self) var logic
+    @Environment(CharactersReadLogic.self) var readlogic
+    var model:CharactersListResponse
+    @State var isFavorite:Bool = false
+    @State var isRead:Bool = false
+    
+    var body: some View {
+        ZStack(alignment: .top) {
+            HStack {
+                Button {
+                    self.isFavorite.toggle()
+                    self.logic.savedFavoriteCharaCharacters(model: model)
+                } label: {
+                    Image(systemName: "star.fill")
+                        .resizable()
+                        .foregroundColor(self.isFavorite ? .yellow:.white)
+                        .frame(width: 20, height: 20)
+                        .padding(.all,10)
+                        .opacity(self.isFavorite ? 1.0:0.5)
+                }.onAppear{
+                    self.isFavorite = logic.isFavoriteCharaCharacters(id: model.id)
+                }
+            }
+            let urlImage = model.thumbnail?.getTThumbnailUrl ?? ""
+            WebImage(url: URL(string: urlImage)) { image in
+                image
+                    .resizable()
+                
+            } placeholder: {
+                Image(.marvelDefault)
+                    .resizable()
+            }
+            .frame(height: 350)
+            
+            HStack {
+                Button {
+                    self.isFavorite.toggle()
+                    self.logic.savedFavoriteCharaCharacters(model: model)
+                } label: {
+                    Image(systemName: "star.fill")
+                        .resizable()
+                        .foregroundColor(self.isFavorite ? .yellow:.white)
+                        .frame(width: 30, height: 30)
+                        .padding(.all,10)
+                        .opacity(self.isFavorite ? 1.0:0.5)
+                }.onAppear{
+                    self.isFavorite = logic.isFavoriteCharaCharacters(id: model.id)
+                }
+                
+                Spacer()
+                
+                Button {
+                    isRead.toggle()
+                    self.readlogic.clickSavedReadCharaCharacters(model: model)
+                    debugPrint(model.id)
+                } label: {
+                    Image(systemName: "bookmark.circle.fill")
+                        .resizable()
+                        .foregroundColor(self.isRead ? .blue:.white)
+                        .frame(width: 30, height: 30)
+                        .padding(.all,10)
+                        .opacity(self.isRead ? 0.8:0.4)
+                }.onAppear{
+                    readlogic.getCharacterSavedDataModel()
+                    self.isRead = readlogic.isReadCharaCharacters(id: model.id)
+                }.onChange(of: self.readlogic.charactersReadList.count) { oldValue, newValue in
+                    self.isRead = readlogic.isReadCharaCharacters(id: model.id)
+                }
+            }.padding(.all, 10)
+            
+        }
+    }
+    
+}
+
+struct ExtraInfoView: View {
+    @Environment(CharactersDetailsViewModel.self) var viewModel
+    
+    var body: some View {
+        VStack(spacing:20) {
+            Spacer()
+            ListComicsView()
+                .environment(viewModel)
+            Spacer()
+            ListUrlView()
+                .environment(viewModel)
+        }
+    }
 }
 
 struct ListComicsView: View {
@@ -134,7 +226,14 @@ struct ListComicsView: View {
                                             Image(systemName: "book.circle")
                                                 .resizable()
                                                 .foregroundColor(.gray)
-                                                .frame(width: 60, height: 60, alignment: .center)
+                                                .frame(width: 60, height: 60, alignment: .center).overlay {
+                                                    ProgressView()
+                                                        .progressViewStyle(CircularProgressViewStyle(tint: Color.white))
+                                                        .scaleEffect(2.0, anchor: .center)
+                                                        .foregroundStyle(.white)
+                                                        .colorMultiply(.white)
+                                                        .padding(.all,10)
+                                                }
                                         }
                                 }
                                 .frame(width: 90,height: 140)
@@ -213,95 +312,6 @@ struct ListUrlView: View {
                 .scrollDisabled(listUrl.count < 4 ? true:false)
             }
             Spacer()
-        }
-    }
-}
-
-struct CharactersDetailsHeadView: View {
-    @Environment(CharactersFavoriteLogic.self) var logic
-    @Environment(CharactersReadLogic.self) var readlogic
-    var model:CharactersListResponse
-    @State var isFavorite:Bool = false
-    @State var isRead:Bool = false
-    
-    var body: some View {
-        ZStack(alignment: .top) {
-            HStack {
-                Button {
-                    self.isFavorite.toggle()
-                    self.logic.savedFavoriteCharaCharacters(model: model)
-                } label: {
-                    Image(systemName: "star.fill")
-                        .resizable()
-                        .foregroundColor(self.isFavorite ? .yellow:.white)
-                        .frame(width: 20, height: 20)
-                        .padding(.all,10)
-                        .opacity(self.isFavorite ? 1.0:0.5)
-                }.onAppear{
-                    self.isFavorite = logic.isFavoriteCharaCharacters(id: model.id)
-                }
-            }
-            let urlImage = model.thumbnail?.getTThumbnailUrl ?? ""
-            WebImage(url: URL(string: urlImage)) { image in
-                image
-                    .resizable()
-                
-            } placeholder: {
-                Image(.marvelDefault)
-                    .resizable()
-            }
-            .frame(height: 350)
-            
-            HStack {
-                Button {
-                    self.isFavorite.toggle()
-                    self.logic.savedFavoriteCharaCharacters(model: model)
-                } label: {
-                    Image(systemName: "star.fill")
-                        .resizable()
-                        .foregroundColor(self.isFavorite ? .yellow:.white)
-                        .frame(width: 30, height: 30)
-                        .padding(.all,10)
-                        .opacity(self.isFavorite ? 1.0:0.5)
-                }.onAppear{
-                    self.isFavorite = logic.isFavoriteCharaCharacters(id: model.id)
-                }
-                
-                Spacer()
-                
-                Button {
-                    isRead.toggle()
-                    self.readlogic.clickSavedReadCharaCharacters(model: model)
-                    debugPrint(model.id)
-                } label: {
-                    Image(systemName: "bookmark.circle.fill")
-                        .resizable()
-                        .foregroundColor(self.isRead ? .blue:.white)
-                        .frame(width: 30, height: 30)
-                        .padding(.all,10)
-                        .opacity(self.isRead ? 0.8:0.4)
-                }.onAppear{
-                    readlogic.getCharacterSavedDataModel()
-                    self.isRead = readlogic.isReadCharaCharacters(id: model.id)
-                }
-            }.padding(.all, 10)
-            
-        }
-    }
-    
-}
-
-struct ExtraInfoView: View {
-    @Environment(CharactersDetailsViewModel.self) var viewModel
-    
-    var body: some View {
-        VStack(spacing:20) {
-            Spacer()
-            ListComicsView()
-                .environment(viewModel)
-            Spacer()
-            ListUrlView()
-                .environment(viewModel)
         }
     }
 }

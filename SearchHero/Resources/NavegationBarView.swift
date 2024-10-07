@@ -57,7 +57,7 @@ struct NavegationBarView<Content: View> : View {
                         .resizable()
                         .frame(width: 110, height: 50, alignment: .center)
                         .scaledToFill()
-                }
+                }.disabled(true)
             }
             
         }
@@ -65,6 +65,7 @@ struct NavegationBarView<Content: View> : View {
         .navigationBarTitleDisplayMode(.inline)
         .navigationBarBackButtonHidden(true)
         .navigationBarTitle("", displayMode: .inline)
+        
     }
     
 }
@@ -131,17 +132,4 @@ struct LoadingProgressView: View {
     }
     
 }
-
-struct BackgroundGrayView: UIViewRepresentable {
-    func makeUIView(context: Context) -> UIView {
-        let view = UIVisualEffectView(effect: .none)
-        DispatchQueue.main.async {
-            view.superview?.superview?.backgroundColor = .clear
-        }
-        return view
-    }
-
-    func updateUIView(_ uiView: UIView, context: Context) {}
-}
-
 

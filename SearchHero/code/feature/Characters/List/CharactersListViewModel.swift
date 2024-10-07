@@ -8,25 +8,14 @@
 import Foundation
 import SwiftUI
 
-enum ProcessStateTypes {
-    case display
-    case emptyDisplay
-}
+
 
 @Observable
-final class CharactersListViewModel {
+final class CharactersListViewModel:BaseViewModel  {
     
-    var processState: ProcessStateTypes
-    var isLoading: Bool = false
-    var isAlertbox: Bool = false
-    var alertTitle:String = "Alerta"
-    var alertMessage:String = "Habido un error en el Sistema"
-    var alertButton:String = "ok"
     var idCharacter:Int = 0
     
-    
     let listCharactersLogic : ListCharactersLogic
-    var charactersList : [CharactersListResponse]
     let charactersFavoriteLogic : CharactersFavoriteLogic
     let charactersReadLogic : CharactersReadLogic
     private var orderType:OrdenByType = .nameAZ
@@ -37,50 +26,27 @@ final class CharactersListViewModel {
     private var moreDataList:Int = 0
     var isMoreDataChager:Bool = false
     var isScrollTop:Bool = false
+    var isDisplayView:Bool = false
     
     
     init(listCharactersLogic: ListCharactersLogic = ListCharactersLogic.sharer,charactersFavoriteLogic:CharactersFavoriteLogic = CharactersFavoriteLogic.sharer,charactersReadLogic:CharactersReadLogic = CharactersReadLogic.sharer) {
         self.listCharactersLogic = listCharactersLogic
         self.charactersFavoriteLogic = charactersFavoriteLogic
         self.charactersReadLogic = charactersReadLogic
-        self.charactersList = []
-        self.processState = .display
     }
 
-    func displayLoading(_ isLoading:Bool = false) {
-        DispatchQueue.main.async  {
-            self.isLoading = isLoading
-        }
-    }
+   
     
-    private func displayProcessState(_ state:ProcessStateTypes) {
+    override func displayProcessState(_ state:ProcessStateTypes) {
         DispatchQueue.main.async  {
             if state == .display {
-                if self.charactersList.isEmpty {
+                if self.listCharactersLogic.charactersList.isEmpty {
                     self.processState = .emptyDisplay
                     return
                 }
                 
             }
-            
             self.processState = state
-        }
-    }
-    
-    func displayAlertMessage(title:String = "" ,mesg:String = "" ,textButton:String = "") {
-        displayLoading()
-        DispatchQueue.main.async  {
-            self.isAlertbox = true
-            if title != ""  {
-                self.alertTitle = title
-            }
-            if mesg != ""  {
-                self.alertMessage = mesg
-            }
-            
-            if textButton != "" {
-                self.alertButton = textButton
-            }
         }
     }
     
@@ -118,7 +84,7 @@ final class CharactersListViewModel {
             do {
                 self.isMoreDataChager = false
                 self.moreDataList += 1
-                if listCharactersLogic.pagerTotal != charactersList.count{
+                if listCharactersLogic.pagerTotal != listCharactersLogic.charactersList.count{
                     await fechlistCharactersData(offset: moreDataList,orderBy: orderType,nameStartsWith: searchText)
                 }
                 self.isMoreDataChager = true
@@ -159,21 +125,16 @@ final class CharactersListViewModel {
         displayLoading(true)
         
         do {
-            let result = try await listCharactersLogic.fechListCharacters(offset:offset,orderBy: orderBy,nameStartsWith: nameStartsWith)
+            try await listCharactersLogic.fechListCharacters(offset:offset,orderBy: orderBy,nameStartsWith: nameStartsWith)
             displayLoading()
             displayProcessState(.display)
             self.isMoreDataChager = true
-            charactersList = result
         } catch {
             displayLoading()
             displayProcessState(.emptyDisplay)
             displayAlertMessage(mesg: error.localizedDescription)
             debugPrint(error.localizedDescription)
         }
-    }
-    
-    func favoriteSavedData(model:CharactersListResponse) {
-        self.charactersFavoriteLogic.savedFavoriteCharaCharacters(model: model)
     }
    
 }

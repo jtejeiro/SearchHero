@@ -11,7 +11,7 @@ import SwiftData
 
 @Observable
 class DatabaseService {
-    let container = try! ModelContainer(for: UserCharactersModel.self )
+    let container = try! ModelContainer(for: UserCharactersModel.self,CharacterSavedDataModel.self )
     
     @MainActor
     var modelContext:ModelContext {

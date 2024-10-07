@@ -8,7 +8,6 @@
 import SwiftUI
 import SDWebImage
 import SDWebImageSwiftUI
-import Combine
 import SwiftData
 
 struct CharactersListView: View {
@@ -18,14 +17,14 @@ struct CharactersListView: View {
     @State public var isShowSearchView: Bool = false
     @State private var searchText = ""
     
-    init() {
-        let viewModel = CharactersListViewModel()
+    init(_ viewModel: CharactersListViewModel = CharactersListViewModel()) {
         self._viewModel =  State(wrappedValue: viewModel)
     }
     
     var body: some View {
         NavegationBarView(hiddenBackButton: $hiddenBackButton) {
             ZStack(alignment: .top) {
+                
                 HeroBackgroundView()
                 
                 VStack(spacing: 5) {
@@ -35,11 +34,16 @@ struct CharactersListView: View {
                             .environment(viewModel)
 
                     }
-                    
                     if viewModel.processState == .emptyDisplay {
                         empyBody
                     } else {
                         contenBody
+                            .onAppear{
+                                viewModel.isDisplayView = true
+                            }
+                            .onDisappear{
+                                viewModel.isDisplayView = false
+                            }
                     }
                 }
                 
@@ -49,9 +53,6 @@ struct CharactersListView: View {
                         .transition(.move(edge: .trailing))
                 }
                 
-                NavigationStack {
-                    
-                }
                 
                 if viewModel.isLoading {
                     LoadingProgressView()
@@ -59,51 +60,53 @@ struct CharactersListView: View {
             }
         }.toolbar {
             
-            ToolbarItem(placement: .navigation) {
-                Button(action: {
-                    if isShowSearchView {
-                        viewModel.resetDataListCharacters()
+            if viewModel.isDisplayView {
+                ToolbarItem(placement: .navigation) {
+                    Button(action: {
+                        if isShowSearchView {
+                            viewModel.resetDataListCharacters()
+                        }
+                        self.isShowSearchView.toggle()
+                        if isShowMenuView{
+                            isShowMenuView = false
+                        }
+                    }) {
+                        Image(systemName: "magnifyingglass.circle.fill")
+                            .resizable()
+                            .renderingMode(.template)
+                            .colorMultiply(.white)
+                            .accentColor(.white)
+                            .aspectRatio(contentMode: .fit)
+                            .tint(.white)
+                            .frame(width: 30, height: 30)
+                        
                     }
-                    self.isShowSearchView.toggle()
-                    if isShowMenuView{
-                        isShowMenuView = false
-                    }
-                }) {
-                    Image(systemName: "magnifyingglass.circle.fill")
-                        .resizable()
-                        .renderingMode(.template)
-                        .colorMultiply(.white)
-                        .accentColor(.white)
-                        .aspectRatio(contentMode: .fit)
-                        .tint(.white)
-                        .frame(width: 30, height: 30)
-                    
                 }
             }
-            
-            
-            ToolbarItem(placement: .confirmationAction) {
-                Button(action: {
-                    self.isShowMenuView.toggle()
-                    if  isShowSearchView{
-                        isShowSearchView = false
+            if viewModel.isDisplayView {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(action: {
+                        self.isShowMenuView.toggle()
+                        if  isShowSearchView{
+                            isShowSearchView = false
+                        }
+                    }) {
+                        Image("filtre")
+                            .resizable()
+                            .renderingMode(.template)
+                            .colorMultiply(.white)
+                            .accentColor(.white)
+                            .aspectRatio(contentMode: .fit)
+                            .tint(.white)
+                            .frame(width: 30, height: 30)
+                        
                     }
-                }) {
-                    Image("filtre")
-                        .resizable()
-                        .renderingMode(.template)
-                        .colorMultiply(.white)
-                        .accentColor(.white)
-                        .aspectRatio(contentMode: .fit)
-                        .tint(.white)
-                        .frame(width: 30, height: 30)
-                    
                 }
             }
             
         }
         .task {
-            if viewModel.charactersList.count == 0 {
+            if viewModel.listCharactersLogic.charactersList.count == 0 {
                 do {
                     await viewModel.fechlistCharactersData()
                 }
@@ -120,6 +123,7 @@ struct CharactersListView: View {
     var contenBody: some View {
         CharactersContainerListView()
             .environment(viewModel)
+            .environment(viewModel.listCharactersLogic)
     }
     
     var empyBody: some View {
@@ -134,7 +138,7 @@ struct CharactersListView: View {
 }
 
 #Preview {
-    CharactersListView()
+    CharactersListView(CharactersListViewModel(listCharactersLogic: ListCharactersLogic(ListCharactersMock())))
 }
 
 struct MenuView: View {
@@ -194,19 +198,20 @@ struct MenuView: View {
 
 struct CharactersContainerListView: View {
     @Environment(CharactersListViewModel.self) var viewModel
+    @Environment(ListCharactersLogic.self) var logic
     @State var id : CharactersListResponse.ID?
     
     var body: some View {
         ZStack {
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 0) {
-                    ForEach(viewModel.charactersList){ index in
+                    ForEach(logic.charactersList){ index in
                         
                         NavigationLink(destination: CharactersDetailsView(idCharacter: index.id)) {
                             CharactersCellView(model: index)
                                 .onAppear{
                                     if viewModel.isMoreDataChager {
-                                        if viewModel.charactersList.last?.id == index.id  {
+                                        if logic.charactersList.last?.id == index.id  {
                                             viewModel.moreDataListCharacters()
                                         }
                                     }
@@ -220,7 +225,7 @@ struct CharactersContainerListView: View {
                         }
                     }
                 }.onChange(of: viewModel.isScrollTop) { oldState, newState in                    withAnimation {
-                    id = viewModel.charactersList.first?.id
+                    id = logic.charactersList.first?.id
                 }
                 }
                 .safeAreaPadding(.vertical)
@@ -231,7 +236,7 @@ struct CharactersContainerListView: View {
             
             ZStack(alignment: .bottomTrailing) {
                 Button {
-                    id = viewModel.charactersList.first?.id
+                    id = logic.charactersList.first?.id
                 } label: {
                     Image(systemName: "arrowshape.up.circle")
                         .resizable()

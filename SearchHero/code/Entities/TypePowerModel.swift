@@ -6,3 +6,9 @@
 //
 
 import Foundation
+
+struct TypePowerModel: Codable {
+    let id: Int
+    let poder: String
+    let icono: String
+}

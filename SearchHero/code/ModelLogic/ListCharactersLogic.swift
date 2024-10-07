@@ -57,20 +57,20 @@ final class ListCharactersLogic {
             let model = try await interactor.loadListCharacters(params: params)
             pagerTotal = model.total
             if offset != 0 && nameStartsWith != "" {
-                await MainActor.run{
+//                await MainActor.run{
                     charactersList.append(contentsOf: model.results)
-                }
+//                }
             } else if offset != 0 && nameStartsWith == "" {
-                await MainActor.run{
+//                await MainActor.run{
                     charactersList.append(contentsOf: model.results)
-                }
+//                }
             }else {
                 if !charactersList.isEmpty {
                     charactersList.removeAll()
                 }
-                await MainActor.run{
+//                await MainActor.run{
                     charactersList = model.results
-                }
+//                }
             }
         } catch {
             debugPrint(error)

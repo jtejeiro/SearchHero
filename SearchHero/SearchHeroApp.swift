@@ -13,7 +13,7 @@ struct SearchHeroApp: App {
     
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            CharacterSavedDataModel.self,
+            CharacterSavedDataModel.self,UserCharactersModel.self
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

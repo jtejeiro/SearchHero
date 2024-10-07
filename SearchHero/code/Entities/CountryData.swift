@@ -6,3 +6,8 @@
 //
 
 import Foundation
+
+struct CountryData: Codable,Identifiable{
+    let id: Int
+    let alpha2, alpha3, name: String
+}

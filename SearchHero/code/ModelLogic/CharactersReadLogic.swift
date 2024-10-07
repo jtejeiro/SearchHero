@@ -9,15 +9,9 @@ import Foundation
 import SwiftData
 
 @Observable
-final class CharactersReadLogic {
+final class CharactersReadLogic:DatabaseService {
     static let sharer = CharactersReadLogic()
-    let container = try! ModelContainer(for: CharacterSavedDataModel.self)
     var charactersReadList : [CharacterSavedDataModel]
-    
-    @MainActor
-    var modelContext:ModelContext {
-        container.mainContext
-    }
     
     @MainActor
     func getCharacterSavedDataModel() {
@@ -45,7 +39,7 @@ final class CharactersReadLogic {
         getCharacterSavedDataModel()
     }
     
-    init() {
+    override init() {
         self.charactersReadList =  []
     }
     

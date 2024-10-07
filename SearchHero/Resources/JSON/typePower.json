@@ -1,2 +1,62 @@
-#  <#Title#>
-
+[
+  {
+    "id": 1,
+    "poder": "Superfuerza",
+    "icono": "💪"
+  },
+  {
+    "id": 2,
+    "poder": "Vuelo",
+    "icono": "🕊️"
+  },
+  {
+    "id": 3,
+    "poder": "Telequinesis",
+    "icono": "🌀"
+  },
+  {
+    "id": 4,
+    "poder": "Invisibilidad",
+    "icono": "👻"
+  },
+  {
+    "id": 5,
+    "poder": "Regeneración",
+    "icono": "♻️"
+  },
+  {
+    "id": 6,
+    "poder": "Control del tiempo",
+    "icono": "⏳"
+  },
+  {
+    "id": 7,
+    "poder": "Manipulación de energía",
+    "icono": "⚡"
+  },
+  {
+    "id": 8,
+    "poder": "Telepatía",
+    "icono": "🧠"
+  },
+  {
+    "id": 9,
+    "poder": "Inmortalidad",
+    "icono": "♾️"
+  },
+  {
+    "id": 10,
+    "poder": "Supervelocidad",
+    "icono": "🏃‍♂️"
+  },
+  {
+    "id": 11,
+    "poder": "Sentidos mejorados",
+    "icono": "👀"
+  },
+  {
+    "id": 12,
+    "poder": "Transformación",
+    "icono": "🔄"
+  }
+]
