@@ -26,8 +26,8 @@ enum pagerParamerterKey: String, CodingKey  {
 @Observable
 final class ListCharactersLogic {
     static let sharer = ListCharactersLogic()
+    private let interactor : ListCharactersInteractor
     var charactersList : [CharactersListResponse]
-    let interactor : ListCharactersInteractor
     var pagerTotal:Int = 0
     let limitValue:Int = 20
     var nameStartsWithValue:String = ""
@@ -39,7 +39,7 @@ final class ListCharactersLogic {
         self.charactersList = []
     }
     
-    func fechListCharacters(offset:Int = 0,orderBy:OrdenByType = .nameAZ,nameStartsWith:String = "") async throws -> [CharactersListResponse] {
+    func fechListCharacters(offset:Int = 0,orderBy:OrdenByType = .nameAZ,nameStartsWith:String = "") async throws {
         let numberOffset = offset != 0 ? limitValue * offset:0
         
         var params = [pagerParamerterKey.offset.rawValue:String(numberOffset)]
@@ -57,16 +57,21 @@ final class ListCharactersLogic {
             let model = try await interactor.loadListCharacters(params: params)
             pagerTotal = model.total
             if offset != 0 && nameStartsWith != "" {
-                charactersList.append(contentsOf: model.results)
+                await MainActor.run{
+                    charactersList.append(contentsOf: model.results)
+                }
             } else if offset != 0 && nameStartsWith == "" {
-                charactersList.append(contentsOf: model.results)
+                await MainActor.run{
+                    charactersList.append(contentsOf: model.results)
+                }
             }else {
                 if !charactersList.isEmpty {
                     charactersList.removeAll()
                 }
-                charactersList = model.results
+                await MainActor.run{
+                    charactersList = model.results
+                }
             }
-            return charactersList
         } catch {
             debugPrint(error)
             throw error
